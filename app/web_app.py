@@ -1,44 +1,49 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import os
+import sqlite3
+import math
 
 app = Flask(__name__)
 app.secret_key = 'sua_chave_secreta'
 
-pecas = {
-    'Processador': [
-        {'nome': 'Intel i5', 'preco': 1200, 'soquete': 'LGA1200'},
-        {'nome': 'Intel i7', 'preco': 1800, 'soquete': 'LGA1200'},
-        {'nome': 'AMD Ryzen 5', 'preco': 1100, 'soquete': 'AM4'},
-    ],
-    'Placa-mãe': [
-        {'nome': 'ASUS Prime', 'preco': 800, 'soquete': 'LGA1200', 'ram': 'DDR4'},
-        {'nome': 'Gigabyte Ultra', 'preco': 950, 'soquete': 'AM4', 'ram': 'DDR4'},
-    ],
-    'Memória RAM': [
-        {'nome': '8GB DDR4', 'preco': 200, 'tipo': 'DDR4'},
-        {'nome': '16GB DDR4', 'preco': 350, 'tipo': 'DDR4'},
-    ],
-    'Armazenamento': [
-        {'nome': 'SSD 240GB', 'preco': 180},
-        {'nome': 'HD 1TB', 'preco': 250},
-    ],
-    'Placa de vídeo': [
-        {'nome': 'NVIDIA GTX 1660', 'preco': 1500},
-        {'nome': 'AMD RX 580', 'preco': 1200},
-    ],
-    'Fonte': [
-        {'nome': 'Corsair 500W', 'preco': 350},
-        {'nome': 'EVGA 600W', 'preco': 400},
-    ],
-    'Gabinete': [
-        {'nome': 'Cooler Master', 'preco': 300},
-        {'nome': 'PCYes Fênix', 'preco': 250},
-    ],
-}
-etapas = list(pecas.keys())
+def carregar_pecas_do_banco():
+    conn = sqlite3.connect('banco.db')  # Altere para o nome/caminho do seu banco
+    conn.row_factory = sqlite3.Row
+    categorias = [
+        ('Processador', 'processadores'),
+        ('Placa-mãe', 'placas_mae'),
+        ('Memória RAM', 'memoria_ram'),
+        ('Armazenamento', 'armazenamento'),
+        ('Placa de vídeo', 'placa_de_video'),
+        ('Fonte', 'fonte'),
+        ('Gabinete', 'gabinete'),
+    ]
+    pecas = {}
+    for nome_cat, tabela in categorias:
+        try:
+            cursor = conn.execute(f'SELECT * FROM {tabela}')
+            pecas[nome_cat] = []
+            for row in cursor.fetchall():
+                item = dict(row)
+                item['nome'] = item.get('nome') or item.get('modelo') or item.get('descricao') or 'Sem nome'
+                item['preco'] = item.get('preco', 0)
+                if 'especificacoes' not in item or not item['especificacoes']:
+                    especs = []
+                    for k, v in item.items():
+                        if k not in ['nome', 'preco', 'id']:
+                            especs.append(f'{k.capitalize()}: {v}')
+                    item['especificacoes'] = '\n'.join(especs)
+                pecas[nome_cat].append(item)
+        except Exception as e:
+            pecas[nome_cat] = []
+    conn.close()
+    return pecas
 
 @app.route('/', methods=['GET', 'POST'])
+@app.route('/montar_pc', methods=['GET', 'POST'])
 def montar_pc():
+    pecas = carregar_pecas_do_banco()
+    etapas = list(pecas.keys())
     etapa_atual = session.get('etapa_atual', 0)
     selecoes = session.get('selecoes', {})
     # Permite navegação direta por query string
@@ -47,6 +52,41 @@ def montar_pc():
         etapa_atual = int(etapa_param)
         session['etapa_atual'] = etapa_atual
     categoria = etapas[etapa_atual]
+
+    # Busca e paginação
+    busca = request.args.get('busca', '').strip().lower()
+    pagina_atual = int(request.form.get('pagina', 1) if request.method == 'POST' else request.args.get('pagina', 1) or 1)
+    try:
+        pagina_atual = int(pagina_atual)
+    except Exception:
+        pagina_atual = 1
+    itens_por_pagina = 8
+
+    lista_itens = []
+    for idx, item in enumerate(pecas.get(categoria, [])):
+        item_copia = item.copy()
+        item_copia['idx'] = idx
+        if 'especificacoes' not in item_copia:
+            especs = []
+            for k, v in item_copia.items():
+                if k not in ['nome', 'preco', 'idx']:
+                    especs.append(f'{k.capitalize()}: {v}')
+            item_copia['especificacoes'] = '\n'.join(especs)
+        lista_itens.append(item_copia)
+
+    if busca:
+        lista_itens = [
+            item for item in lista_itens
+            if busca in item['nome'].lower() or busca in item.get('especificacoes', '').lower()
+        ]
+
+    total_itens = len(lista_itens)
+    total_paginas = max(1, math.ceil(total_itens / itens_por_pagina))
+    pagina_atual = max(1, min(pagina_atual, total_paginas))
+    start = (pagina_atual - 1) * itens_por_pagina
+    end = start + itens_por_pagina
+    itens_paginados = lista_itens[start:end]
+
     if request.method == 'POST':
         if 'voltar' in request.form:
             if etapa_atual > 0:
@@ -57,6 +97,8 @@ def montar_pc():
                 selecoes.pop(categoria)
                 session['selecoes'] = selecoes
             return redirect(url_for('montar_pc'))
+        if 'pagina' in request.form:
+            return redirect(url_for('montar_pc', etapa=etapa_atual, busca=busca, pagina=request.form['pagina']))
         idx = int(request.form.get('opcao', 0))
         selecoes[categoria] = idx
         session['selecoes'] = selecoes
@@ -65,18 +107,37 @@ def montar_pc():
             return redirect(url_for('montar_pc'))
         else:
             return redirect(url_for('finalizar'))
+
     selecao = selecoes.get(categoria, None)
-    total = sum(pecas[cat][idx]['preco'] for cat, idx in selecoes.items())
+    total = sum(pecas[cat][idx]['preco'] for cat, idx in selecoes.items() if cat in pecas and idx < len(pecas[cat]))
     # Monta mensagem para WhatsApp
     msg = 'Olá! Gostaria de uma consultoria para o seguinte PC:%0A'
     for cat, idx in selecoes.items():
-        msg += f"{cat}: {pecas[cat][idx]['nome']} (R$ {pecas[cat][idx]['preco']})%0A"
+        if cat in pecas and idx < len(pecas[cat]):
+            msg += f"{cat}: {pecas[cat][idx]['nome']} (R$ {pecas[cat][idx]['preco']})%0A"
     msg += f"Total: R$ {total}"
     whatsapp_url = f"https://wa.me/+5528999928442?text={msg}"
-    return render_template('montar_pc.html', etapas=etapas, etapa_atual=etapa_atual, categoria=categoria, pecas=pecas, selecao=selecao, selecoes=selecoes, total=total, whatsapp_url=whatsapp_url)
+
+    return render_template(
+        'montar_pc.html',
+        etapas=etapas,
+        etapa_atual=etapa_atual,
+        categoria=categoria,
+        pecas=pecas,
+        selecao=selecao,
+        selecoes=selecoes,
+        total=total,
+        whatsapp_url=whatsapp_url,
+        busca=busca,
+        itens_paginados=itens_paginados,
+        pagina_atual=pagina_atual,
+        total_paginas=total_paginas
+    )
 
 @app.route('/finalizar', methods=['GET', 'POST'])
 def finalizar():
+    pecas = carregar_pecas_do_banco()
+    etapas = list(pecas.keys())
     selecoes = session.get('selecoes', {})
     if len(selecoes) < len(etapas):
         flash('Por favor, selecione todas as peças antes de finalizar.', 'danger')
@@ -90,23 +151,15 @@ def finalizar():
         session.clear()
         return redirect(url_for('montar_pc'))
     erros = []
-    if proc['soquete'] != mb['soquete']:
+    if proc.get('soquete') != mb.get('soquete'):
         erros.append('Processador e Placa-mãe incompatíveis (soquete diferente).')
-    if mb['ram'] != ram['tipo']:
+    if mb.get('ram') != ram.get('tipo'):
         erros.append('Placa-mãe e Memória RAM incompatíveis (tipo diferente).')
     if erros:
         for erro in erros:
             flash(erro, 'danger')
         session['etapa_atual'] = 0
         return redirect(url_for('montar_pc'))
-    total = sum(pecas[cat][idx]['preco'] for cat, idx in selecoes.items())
-    return render_template('montar_pc.html', etapas=etapas, etapa_atual=len(etapas)-1, categoria=etapas[-1], pecas=pecas, selecao=selecoes.get(etapas[-1], 0), selecoes=selecoes, total=total, resumo=True)
-
-@app.route('/reset')
-def reset():
-    session.clear()
-    return redirect(url_for('montar_pc'))
-
-if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    total = sum(pecas[cat][idx]['preco'] for cat, idx in selecoes.items() if cat in pecas and idx < len(pecas[cat]))
+    selecao = selecoes.get(etapas[-1], 0)
+    return render_template('montar_pc.html', etapas=etapas, etapa_atual=len(etapas)-1, categoria=etapas[-1], pecas=pecas, selecao=selecao, selecoes=selecoes, total=total, resumo=True)

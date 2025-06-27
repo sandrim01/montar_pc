@@ -126,20 +126,34 @@
                 </div>
             {% endfor %}
         </div>
+        <form method="get" style="text-align:center; margin-bottom: 20px;">
+            <input type="text" name="busca" placeholder="Pesquisar..." value="{{ busca|default('') }}" style="padding:8px 16px; width:260px; border-radius:4px; border:1px solid #ccc; font-size:16px;">
+            <button class="btn" type="submit" style="margin-left:8px;">Buscar</button>
+        </form>
         <form method="post">
             <div class="cards">
-                {% for item in pecas[categoria] %}
-                    {% set idx = loop.index0 %}
+                {% for item in itens_paginados %}
+                    {% set idx = item.idx %}
                     <label class="card {% if selecao == idx %}selected{% endif %}">
                         <input type="radio" name="opcao" value="{{ idx }}" style="display:none;" {% if selecao == idx %}checked{% endif %} onchange="this.form.submit()">
                         <img src="/static/{{ categoria|lower|replace(' ', '_') }}.png" alt="{{ item.nome }}">
                         <div><strong>{{ item.nome }}</strong></div>
                         <div>R$ {{ item.preco }}</div>
+                        <div style="font-size:13px; color:#444; margin:8px 0 0 0; text-align:left; white-space:pre-line; min-height:48px;">{{ item.especificacoes|default('')|truncate(120, True, '...') }}</div>
                         {% if selecao == idx %}
                             <button type="submit" name="remover" value="{{ idx }}" class="remove-btn">Remover</button>
                         {% endif %}
                     </label>
                 {% endfor %}
+            </div>
+            <div style="text-align:center; margin: 18px 0;">
+                {% if pagina_atual > 1 %}
+                    <button class="btn" type="submit" name="pagina" value="{{ pagina_atual - 1 }}">Anterior</button>
+                {% endif %}
+                <span style="margin:0 12px; color:#222; font-weight:bold;">Página {{ pagina_atual }} de {{ total_paginas }}</span>
+                {% if pagina_atual < total_paginas %}
+                    <button class="btn" type="submit" name="pagina" value="{{ pagina_atual + 1 }}">Próxima</button>
+                {% endif %}
             </div>
             <div style="text-align:center;display:flex;justify-content:center;gap:16px;">
                 <button class="btn" type="submit" name="voltar" value="1" {% if etapa_atual == 0 %}disabled{% endif %}>Voltar</button>
