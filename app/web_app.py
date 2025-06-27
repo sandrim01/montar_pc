@@ -1,14 +1,14 @@
 from flask import Flask, render_template, request, redirect, url_for, flash, session
 import os
-import sqlite3
+import psycopg2
 import math
 
 app = Flask(__name__)
 app.secret_key = 'sua_chave_secreta'
 
 def carregar_pecas_do_banco():
-    conn = sqlite3.connect('banco.db')  # Altere para o nome/caminho do seu banco
-    conn.row_factory = sqlite3.Row
+    url = os.environ.get('DATABASE_URL', 'postgresql://postgres:tlFQnkpHDYvruDCfMZWptHDIDTceUrVK@maglev.proxy.rlwy.net:52420/railway')
+    conn = psycopg2.connect(url)
     categorias = [
         ('Processador', 'processadores'),
         ('Placa-mãe', 'placas_mae'),
@@ -21,19 +21,21 @@ def carregar_pecas_do_banco():
     pecas = {}
     for nome_cat, tabela in categorias:
         try:
-            cursor = conn.execute(f'SELECT * FROM {tabela}')
-            pecas[nome_cat] = []
-            for row in cursor.fetchall():
-                item = dict(row)
-                item['nome'] = item.get('nome') or item.get('modelo') or item.get('descricao') or 'Sem nome'
-                item['preco'] = item.get('preco', 0)
-                if 'especificacoes' not in item or not item['especificacoes']:
-                    especs = []
-                    for k, v in item.items():
-                        if k not in ['nome', 'preco', 'id']:
-                            especs.append(f'{k.capitalize()}: {v}')
-                    item['especificacoes'] = '\n'.join(especs)
-                pecas[nome_cat].append(item)
+            with conn.cursor() as cursor:
+                cursor.execute(f'SELECT * FROM {tabela}')
+                colnames = [desc[0] for desc in cursor.description]
+                pecas[nome_cat] = []
+                for row in cursor.fetchall():
+                    item = dict(zip(colnames, row))
+                    item['nome'] = item.get('nome') or item.get('modelo') or item.get('descricao') or 'Sem nome'
+                    item['preco'] = item.get('preco', 0)
+                    if 'especificacoes' not in item or not item['especificacoes']:
+                        especs = []
+                        for k, v in item.items():
+                            if k not in ['nome', 'preco', 'id']:
+                                especs.append(f'{k.capitalize()}: {v}')
+                        item['especificacoes'] = '\n'.join(especs)
+                    pecas[nome_cat].append(item)
         except Exception as e:
             pecas[nome_cat] = []
     conn.close()
