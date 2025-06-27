@@ -15,6 +15,7 @@ body, html {
     justify-content: center;
     position: relative;
     overflow: hidden;
+    padding-top: 70px;
 }
 .hero-bg::before {
     content: '';
@@ -129,6 +130,51 @@ body, html {
     background: #c82333;
 }
 
+.main-nav {
+    width: 100vw;
+    background: rgba(10, 26, 47, 0.98);
+    box-shadow: 0 2px 16px 0 #1e90ff22;
+    padding: 0.5rem 0;
+    display: flex;
+    justify-content: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+}
+.main-nav ul {
+    display: flex;
+    gap: 2vw;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.main-nav li {
+    display: flex;
+    align-items: center;
+}
+.main-nav a {
+    display: flex;
+    align-items: center;
+    color: #b0e57c;
+    font-weight: 600;
+    font-size: 1.08rem;
+    text-decoration: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    transition: background 0.18s, color 0.18s;
+}
+.main-nav a:hover {
+    background: #1e90ff33;
+    color: #fff;
+}
+.nav-icon {
+    height: 28px;
+    width: 28px;
+    margin-right: 8px;
+    filter: drop-shadow(0 0 6px #1e90ff88);
+}
+
 @media (max-width: 600px) {
     .new-hero {
         padding: 24px 6vw 20px 6vw;
@@ -143,5 +189,20 @@ body, html {
     .start-btn {
         font-size: 1rem;
         padding: 12px 18px;
+    }
+}
+
+@media (max-width: 800px) {
+    .main-nav ul {
+        gap: 1vw;
+    }
+    .main-nav a {
+        font-size: 0.95rem;
+        padding: 6px 6px;
+    }
+    .nav-icon {
+        height: 22px;
+        width: 22px;
+        margin-right: 4px;
     }
 }
