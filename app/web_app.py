@@ -59,11 +59,16 @@ def montar_pc():
 def finalizar():
     selecoes = session.get('selecoes', {})
     if len(selecoes) < len(etapas):
+        flash('Por favor, selecione todas as peças antes de finalizar.', 'danger')
         return redirect(url_for('montar_pc'))
-    # Checagem de compatibilidade
-    proc = pecas['Processador'][selecoes['Processador']]
-    mb = pecas['Placa-mãe'][selecoes['Placa-mãe']]
-    ram = pecas['Memória RAM'][selecoes['Memória RAM']]
+    try:
+        proc = pecas['Processador'][selecoes['Processador']]
+        mb = pecas['Placa-mãe'][selecoes['Placa-mãe']]
+        ram = pecas['Memória RAM'][selecoes['Memória RAM']]
+    except (KeyError, IndexError):
+        flash('Seleção inválida detectada. Por favor, reinicie a montagem.', 'danger')
+        session.clear()
+        return redirect(url_for('montar_pc'))
     erros = []
     if proc['soquete'] != mb['soquete']:
         erros.append('Processador e Placa-mãe incompatíveis (soquete diferente).')
@@ -84,4 +89,4 @@ def reset():
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=port, debug=True)
