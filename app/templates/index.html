@@ -4,23 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monte seu PC</title>
+    <meta name="description" content="Monte o setup dos seus sonhos de forma fácil, rápida e divertida! Escolha processador, placa-mãe, memória RAM, armazenamento, placa de vídeo, fonte e gabinete.">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <nav class="main-nav">
-        <ul>
-            <li><a href="{{ url_for('montar_pc') }}?etapa=0"><img src="{{ url_for('static', filename='processador.png') }}" alt="Processador" class="nav-icon"> Processador</a></li>
-            <li><a href="{{ url_for('montar_pc') }}?etapa=1"><img src="{{ url_for('static', filename='placa-mãe.png') }}" alt="Placa-mãe" class="nav-icon"> Placa-mãe</a></li>
-            <li><a href="{{ url_for('montar_pc') }}?etapa=2"><img src="{{ url_for('static', filename='memória_ram.png') }}" alt="Memória RAM" class="nav-icon"> Memória RAM</a></li>
-            <li><a href="{{ url_for('montar_pc') }}?etapa=3"><img src="{{ url_for('static', filename='armazenamento.png') }}" alt="Armazenamento" class="nav-icon"> Armazenamento</a></li>
-            <li><a href="{{ url_for('montar_pc') }}?etapa=4"><img src="{{ url_for('static', filename='placa_de_vídeo.png') }}" alt="Placa de Vídeo" class="nav-icon"> Placa de Vídeo</a></li>
-            <li><a href="{{ url_for('montar_pc') }}?etapa=5"><img src="{{ url_for('static', filename='fonte.png') }}" alt="Fonte" class="nav-icon"> Fonte</a></li>
-            <li><a href="{{ url_for('montar_pc') }}?etapa=6"><img src="{{ url_for('static', filename='gabinete.png') }}" alt="Gabinete" class="nav-icon"> Gabinete</a></li>
-        </ul>
-    </nav>
+    <header>
+        <nav class="main-nav">
+            <ul>
+                <li><a href="{{ url_for('montar_pc') }}?etapa=0"><img src="{{ url_for('static', filename='processador.png') }}" alt="Ícone de Processador" class="nav-icon"> Processador</a></li>
+                <li><a href="{{ url_for('montar_pc') }}?etapa=1"><img src="{{ url_for('static', filename='placa-mãe.png') }}" alt="Ícone de Placa-mãe" class="nav-icon"> Placa-mãe</a></li>
+                <li><a href="{{ url_for('montar_pc') }}?etapa=2"><img src="{{ url_for('static', filename='memória_ram.png') }}" alt="Ícone de Memória RAM" class="nav-icon"> Memória RAM</a></li>
+                <li><a href="{{ url_for('montar_pc') }}?etapa=3"><img src="{{ url_for('static', filename='armazenamento.png') }}" alt="Ícone de Armazenamento" class="nav-icon"> Armazenamento</a></li>
+                <li><a href="{{ url_for('montar_pc') }}?etapa=4"><img src="{{ url_for('static', filename='placa_de_vídeo.png') }}" alt="Ícone de Placa de Vídeo" class="nav-icon"> Placa de Vídeo</a></li>
+                <li><a href="{{ url_for('montar_pc') }}?etapa=5"><img src="{{ url_for('static', filename='fonte.png') }}" alt="Ícone de Fonte" class="nav-icon"> Fonte</a></li>
+                <li><a href="{{ url_for('montar_pc') }}?etapa=6"><img src="{{ url_for('static', filename='gabinete.png') }}" alt="Ícone de Gabinete" class="nav-icon"> Gabinete</a></li>
+            </ul>
+        </nav>
+    </header>
     <div class="hero-bg">
         <div class="container new-hero">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-hero">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo Monte seu PC" class="logo-hero">
             <h1 class="main-title">Monte seu PC</h1>
             <p class="subtitle">Monte o setup dos seus sonhos de forma fácil, rápida e divertida!</p>
             <a href="{{ url_for('montar_pc') }}" class="start-btn">
@@ -29,5 +32,8 @@
             </a>
         </div>
     </div>
+    <footer style="text-align:center; margin-top:2rem; color:#888; font-size:0.95rem;">
+        &copy; {{ now().year if now else '2025' }} Monte seu PC. Todos os direitos reservados.
+    </footer>
 </body>
 </html>
