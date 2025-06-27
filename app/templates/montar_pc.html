@@ -114,13 +114,14 @@
     </div>
     <form method="post">
         <div class="cards">
-            {% for idx, item in enumerate(pecas[categoria]) %}
-            <label class="card {% if selecao == idx %}selected{% endif %}">
-                <input type="radio" name="opcao" value="{{ idx }}" style="display:none;" {% if selecao == idx %}checked{% endif %}>
-                <img src="/static/{{ categoria|lower|replace(' ', '_') }}.png" alt="{{ item.nome }}">
-                <div><strong>{{ item.nome }}</strong></div>
-                <div>R$ {{ item.preco }}</div>
-            </label>
+            {% for item in pecas[categoria] %}
+                {% set idx = loop.index0 %}
+                <label class="card {% if selecao == idx %}selected{% endif %}">
+                    <input type="radio" name="opcao" value="{{ idx }}" style="display:none;" {% if selecao == idx %}checked{% endif %}>
+                    <img src="/static/{{ categoria|lower|replace(' ', '_') }}.png" alt="{{ item.nome }}">
+                    <div><strong>{{ item.nome }}</strong></div>
+                    <div>R$ {{ item.preco }}</div>
+                </label>
             {% endfor %}
         </div>
         <div style="text-align:center;">
