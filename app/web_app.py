@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 import os
 
 app = Flask(__name__)
@@ -35,37 +35,52 @@ pecas = {
         {'nome': 'PCYes Fênix', 'preco': 250},
     ],
 }
+etapas = list(pecas.keys())
 
 @app.route('/', methods=['GET', 'POST'])
-def index():
+def montar_pc():
+    etapa_atual = session.get('etapa_atual', 0)
+    selecoes = session.get('selecoes', {})
+    categoria = etapas[etapa_atual]
     if request.method == 'POST':
-        selecoes = {}
-        for categoria in pecas:
-            idx = int(request.form.get(categoria, 0))
-            selecoes[categoria] = idx
-        # Checagem de compatibilidade
-        proc = pecas['Processador'][selecoes['Processador']]
-        mb = pecas['Placa-mãe'][selecoes['Placa-mãe']]
-        ram = pecas['Memória RAM'][selecoes['Memória RAM']]
-        erros = []
-        if proc['soquete'] != mb['soquete']:
-            erros.append('Processador e Placa-mãe incompatíveis (soquete diferente).')
-        if mb['ram'] != ram['tipo']:
-            erros.append('Placa-mãe e Memória RAM incompatíveis (tipo diferente).')
-        if erros:
-            for erro in erros:
-                flash(erro, 'danger')
-            return render_template('index.html', pecas=pecas, selecoes=selecoes)
-        # Montar resumo
-        total = 0
-        resumo = []
-        for categoria, idx in selecoes.items():
-            item = pecas[categoria][idx]
-            resumo.append(f"{categoria}: {item['nome']} (R$ {item['preco']})")
-            total += item['preco']
-        resumo.append(f"Preço total: R$ {total}")
-        return render_template('index.html', pecas=pecas, selecoes=selecoes, resumo=resumo)
-    return render_template('index.html', pecas=pecas)
+        idx = int(request.form.get('opcao', 0))
+        selecoes[categoria] = idx
+        session['selecoes'] = selecoes
+        if etapa_atual < len(etapas) - 1:
+            session['etapa_atual'] = etapa_atual + 1
+            return redirect(url_for('montar_pc'))
+        else:
+            return redirect(url_for('finalizar'))
+    selecao = selecoes.get(categoria, 0)
+    total = sum(pecas[cat][idx]['preco'] for cat, idx in selecoes.items())
+    return render_template('montar_pc.html', etapas=etapas, etapa_atual=etapa_atual, categoria=categoria, pecas=pecas, selecao=selecao, selecoes=selecoes, total=total)
+
+@app.route('/finalizar', methods=['GET', 'POST'])
+def finalizar():
+    selecoes = session.get('selecoes', {})
+    if len(selecoes) < len(etapas):
+        return redirect(url_for('montar_pc'))
+    # Checagem de compatibilidade
+    proc = pecas['Processador'][selecoes['Processador']]
+    mb = pecas['Placa-mãe'][selecoes['Placa-mãe']]
+    ram = pecas['Memória RAM'][selecoes['Memória RAM']]
+    erros = []
+    if proc['soquete'] != mb['soquete']:
+        erros.append('Processador e Placa-mãe incompatíveis (soquete diferente).')
+    if mb['ram'] != ram['tipo']:
+        erros.append('Placa-mãe e Memória RAM incompatíveis (tipo diferente).')
+    if erros:
+        for erro in erros:
+            flash(erro, 'danger')
+        session['etapa_atual'] = 0
+        return redirect(url_for('montar_pc'))
+    total = sum(pecas[cat][idx]['preco'] for cat, idx in selecoes.items())
+    return render_template('montar_pc.html', etapas=etapas, etapa_atual=len(etapas)-1, categoria=etapas[-1], pecas=pecas, selecao=selecoes.get(etapas[-1], 0), selecoes=selecoes, total=total, resumo=True)
+
+@app.route('/reset')
+def reset():
+    session.clear()
+    return redirect(url_for('montar_pc'))
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
