@@ -3,17 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monte seu PC - Futurista</title>
+    <title>Monte seu PC</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <div class="container">
-        <h1 class="main-title">Monte seu PC</h1>
-        <button class="logo-btn" onclick="window.location.href='{{ url_for('montar_pc') }}'">
-            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
-            <span class="btn-text">Iniciar</span>
-        </button>
-        <p class="subtitle">Escolha as melhores peças e periféricos para seu setup!</p>
+    <div class="hero-bg">
+        <div class="container new-hero">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-hero">
+            <h1 class="main-title">Monte seu PC</h1>
+            <p class="subtitle">Monte o setup dos seus sonhos de forma fácil, rápida e divertida!</p>
+            <a href="{{ url_for('montar_pc') }}" class="start-btn">
+                <span>Começar agora</span>
+                <svg width="28" height="28" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="14" fill="#b0e57c"/><path d="M11 9l6 5-6 5V9z" fill="#0a1a2f"/></svg>
+            </a>
+        </div>
     </div>
 </body>
 </html>
