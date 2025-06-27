@@ -1,0 +1,40 @@
+body {
+    background: linear-gradient(135deg, #0a1a2f 0%, #1e3a5c 100%);
+    color: #fff;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.container {
+    max-width: 500px;
+    margin: 60px auto;
+    background: rgba(10, 26, 47, 0.95);
+    border-radius: 18px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    padding: 40px 30px 30px 30px;
+    text-align: center;
+    border: 2px solid #1e90ff;
+}
+
+.logo {
+    width: 120px;
+    margin-bottom: 20px;
+    filter: drop-shadow(0 0 10px #1e90ff);
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: #1e90ff;
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    color: #b0e57c;
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+    font-weight: 500;
+}
+
+/* Botões e inputs futuristas podem ser adicionados depois */

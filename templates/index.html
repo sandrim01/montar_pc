@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Monte seu PC</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Monte seu PC!</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        <ul>
+        {% for category, message in messages %}
+          <li style="color: red;">{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+    <form method="post">
+        {% for categoria, itens in pecas.items() %}
+            <label>{{ categoria }}:</label>
+            <select name="{{ categoria }}">
+                {% for item in itens %}
+                    <option value="{{ loop.index0 }}" {% if selecoes and selecoes[categoria] == loop.index0 %}selected{% endif %}>
+                        {{ item.nome }} (R$ {{ item.preco }})
+                    </option>
+                {% endfor %}
+            </select>
+            <br><br>
+        {% endfor %}
+        <button type="submit">Finalizar Montagem</button>
+    </form>
+    {% if resumo %}
+        <h2>Resumo:</h2>
+        <ul>
+        {% for linha in resumo %}
+            <li>{{ linha }}</li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+</body>
+</html>
