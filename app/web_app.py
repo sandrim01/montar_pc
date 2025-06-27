@@ -67,7 +67,13 @@ def montar_pc():
             return redirect(url_for('finalizar'))
     selecao = selecoes.get(categoria, None)
     total = sum(pecas[cat][idx]['preco'] for cat, idx in selecoes.items())
-    return render_template('montar_pc.html', etapas=etapas, etapa_atual=etapa_atual, categoria=categoria, pecas=pecas, selecao=selecao, selecoes=selecoes, total=total)
+    # Monta mensagem para WhatsApp
+    msg = 'Olá! Gostaria de uma consultoria para o seguinte PC:%0A'
+    for cat, idx in selecoes.items():
+        msg += f"{cat}: {pecas[cat][idx]['nome']} (R$ {pecas[cat][idx]['preco']})%0A"
+    msg += f"Total: R$ {total}"
+    whatsapp_url = f"https://wa.me/+5528999928442?text={msg}"
+    return render_template('montar_pc.html', etapas=etapas, etapa_atual=etapa_atual, categoria=categoria, pecas=pecas, selecao=selecao, selecoes=selecoes, total=total, whatsapp_url=whatsapp_url)
 
 @app.route('/finalizar', methods=['GET', 'POST'])
 def finalizar():
