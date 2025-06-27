@@ -7,6 +7,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
+    <nav class="main-nav">
+        <ul>
+            <li><a href="{{ url_for('montar_pc') }}?etapa=0"><img src="{{ url_for('static', filename='processador.png') }}" alt="Processador" class="nav-icon"> Processador</a></li>
+            <li><a href="{{ url_for('montar_pc') }}?etapa=1"><img src="{{ url_for('static', filename='placa-mãe.png') }}" alt="Placa-mãe" class="nav-icon"> Placa-mãe</a></li>
+            <li><a href="{{ url_for('montar_pc') }}?etapa=2"><img src="{{ url_for('static', filename='memória_ram.png') }}" alt="Memória RAM" class="nav-icon"> Memória RAM</a></li>
+            <li><a href="{{ url_for('montar_pc') }}?etapa=3"><img src="{{ url_for('static', filename='armazenamento.png') }}" alt="Armazenamento" class="nav-icon"> Armazenamento</a></li>
+            <li><a href="{{ url_for('montar_pc') }}?etapa=4"><img src="{{ url_for('static', filename='placa_de_vídeo.png') }}" alt="Placa de Vídeo" class="nav-icon"> Placa de Vídeo</a></li>
+            <li><a href="{{ url_for('montar_pc') }}?etapa=5"><img src="{{ url_for('static', filename='fonte.png') }}" alt="Fonte" class="nav-icon"> Fonte</a></li>
+            <li><a href="{{ url_for('montar_pc') }}?etapa=6"><img src="{{ url_for('static', filename='gabinete.png') }}" alt="Gabinete" class="nav-icon"> Gabinete</a></li>
+        </ul>
+    </nav>
     <div class="hero-bg">
         <div class="container new-hero">
             <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo-hero">
