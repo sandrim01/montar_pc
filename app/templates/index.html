@@ -8,10 +8,12 @@
 </head>
 <body>
     <div class="container">
-        <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
-        <h1>Monte seu PC</h1>
+        <h1 class="main-title">Monte seu PC</h1>
+        <button class="logo-btn" onclick="window.location.href='{{ url_for('montar_pc') }}'">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="Logo" class="logo">
+            <span class="btn-text">Iniciar</span>
+        </button>
         <p class="subtitle">Escolha as melhores peças e periféricos para seu setup!</p>
-        <!-- Conteúdo do app será adicionado aqui -->
     </div>
 </body>
 </html>
