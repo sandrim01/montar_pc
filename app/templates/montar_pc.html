@@ -116,53 +116,56 @@
     </style>
 </head>
 <body>
-    <h1>Monte seu PC</h1>
-    <div class="progress-bar">
-        {% for etapa in etapas %}
-            <div class="progress-step {% if loop.index0 == etapa_atual %}active{% endif %}">
-                <a href="{{ url_for('montar_pc') }}?etapa={{ loop.index0 }}" style="color:inherit;text-decoration:none;">{{ etapa }}</a>
+    {% extends 'base_montagem.html' %}
+    {% block conteudo %}
+        <h1>Monte seu PC</h1>
+        <div class="progress-bar">
+            {% for etapa in etapas %}
+                <div class="progress-step {% if loop.index0 == etapa_atual %}active{% endif %}">
+                    <a href="{{ url_for('montar_pc') }}?etapa={{ loop.index0 }}" style="color:inherit;text-decoration:none;">{{ etapa }}</a>
+                </div>
+            {% endfor %}
+        </div>
+        <form method="post">
+            <div class="cards">
+                {% for item in pecas[categoria] %}
+                    {% set idx = loop.index0 %}
+                    <label class="card {% if selecao == idx %}selected{% endif %}">
+                        <input type="radio" name="opcao" value="{{ idx }}" style="display:none;" {% if selecao == idx %}checked{% endif %} onchange="this.form.submit()">
+                        <img src="/static/{{ categoria|lower|replace(' ', '_') }}.png" alt="{{ item.nome }}">
+                        <div><strong>{{ item.nome }}</strong></div>
+                        <div>R$ {{ item.preco }}</div>
+                        {% if selecao == idx %}
+                            <button type="submit" name="remover" value="{{ idx }}" class="remove-btn">Remover</button>
+                        {% endif %}
+                    </label>
+                {% endfor %}
             </div>
-        {% endfor %}
-    </div>
-    <form method="post">
-        <div class="cards">
-            {% for item in pecas[categoria] %}
-                {% set idx = loop.index0 %}
-                <label class="card {% if selecao == idx %}selected{% endif %}">
-                    <input type="radio" name="opcao" value="{{ idx }}" style="display:none;" {% if selecao == idx %}checked{% endif %} onchange="this.form.submit()">
-                    <img src="/static/{{ categoria|lower|replace(' ', '_') }}.png" alt="{{ item.nome }}">
-                    <div><strong>{{ item.nome }}</strong></div>
-                    <div>R$ {{ item.preco }}</div>
-                    {% if selecao == idx %}
-                        <button type="submit" name="remover" value="{{ idx }}" class="remove-btn">Remover</button>
-                    {% endif %}
-                </label>
-            {% endfor %}
+            <div style="text-align:center;display:flex;justify-content:center;gap:16px;">
+                <button class="btn" type="submit" name="voltar" value="1" {% if etapa_atual == 0 %}disabled{% endif %}>Voltar</button>
+                <button class="btn" type="submit">Próximo</button>
+            </div>
+        </form>
+        <div class="side-panel">
+            <h2>Revisão</h2>
+            <ul>
+                {% for cat, idx in selecoes.items() %}
+                    <li>
+                        <a href="{{ url_for('montar_pc') }}?etapa={{ etapas.index(cat) }}" style="color:#1e90ff;text-decoration:underline;">{{ cat }}</a>:
+                        {{ pecas[cat][idx].nome }} (R$ {{ pecas[cat][idx].preco }})
+                    </li>
+                {% endfor %}
+            </ul>
+            <div class="total">Total: R$ {{ total }}</div>
+            <a id="whatsapp-btn" class="btn whatsapp-btn" target="_blank" style="display:flex;align-items:center;gap:10px;justify-content:center;margin-top:18px;" href="{{ whatsapp_url }}">
+                <img src="/static/logo.png" alt="Logo" style="height:28px;width:28px;vertical-align:middle;"> Enviar para consultoria
+            </a>
+            {% if etapa_atual == etapas|length - 1 %}
+                <form method="post" action="/finalizar">
+                    <button class="btn" type="submit">Finalizar Montagem</button>
+                </form>
+            {% endif %}
         </div>
-        <div style="text-align:center;display:flex;justify-content:center;gap:16px;">
-            <button class="btn" type="submit" name="voltar" value="1" {% if etapa_atual == 0 %}disabled{% endif %}>Voltar</button>
-            <button class="btn" type="submit">Próximo</button>
-        </div>
-    </form>
-    <div class="side-panel">
-        <h2>Revisão</h2>
-        <ul>
-            {% for cat, idx in selecoes.items() %}
-                <li>
-                    <a href="{{ url_for('montar_pc') }}?etapa={{ etapas.index(cat) }}" style="color:#1e90ff;text-decoration:underline;">{{ cat }}</a>:
-                    {{ pecas[cat][idx].nome }} (R$ {{ pecas[cat][idx].preco }})
-                </li>
-            {% endfor %}
-        </ul>
-        <div class="total">Total: R$ {{ total }}</div>
-        <a id="whatsapp-btn" class="btn whatsapp-btn" target="_blank" style="display:flex;align-items:center;gap:10px;justify-content:center;margin-top:18px;" href="{{ whatsapp_url }}">
-            <img src="/static/logo.png" alt="Logo" style="height:28px;width:28px;vertical-align:middle;"> Enviar para consultoria
-        </a>
-        {% if etapa_atual == etapas|length - 1 %}
-            <form method="post" action="/finalizar">
-                <button class="btn" type="submit">Finalizar Montagem</button>
-            </form>
-        {% endif %}
-    </div>
+    {% endblock %}
 </body>
 </html>
