@@ -108,6 +108,27 @@ body, html {
     box-shadow: 0 8px 32px 0 #b0e57c55;
 }
 
+.card.selected {
+    border: 2.5px solid #1e90ff;
+    box-shadow: 0 4px 16px rgba(30,144,255,0.18);
+    background: #eaf6ff;
+    position: relative;
+}
+.remove-btn {
+    margin-top: 10px;
+    background: #ff4d4d;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 6px 16px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: background 0.2s;
+}
+.remove-btn:hover {
+    background: #c82333;
+}
+
 @media (max-width: 600px) {
     .new-hero {
         padding: 24px 6vw 20px 6vw;

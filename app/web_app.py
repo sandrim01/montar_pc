@@ -41,8 +41,22 @@ etapas = list(pecas.keys())
 def montar_pc():
     etapa_atual = session.get('etapa_atual', 0)
     selecoes = session.get('selecoes', {})
+    # Permite navegação direta por query string
+    etapa_param = request.args.get('etapa')
+    if etapa_param is not None and etapa_param.isdigit():
+        etapa_atual = int(etapa_param)
+        session['etapa_atual'] = etapa_atual
     categoria = etapas[etapa_atual]
     if request.method == 'POST':
+        if 'voltar' in request.form:
+            if etapa_atual > 0:
+                session['etapa_atual'] = etapa_atual - 1
+            return redirect(url_for('montar_pc'))
+        if 'remover' in request.form:
+            if categoria in selecoes:
+                selecoes.pop(categoria)
+                session['selecoes'] = selecoes
+            return redirect(url_for('montar_pc'))
         idx = int(request.form.get('opcao', 0))
         selecoes[categoria] = idx
         session['selecoes'] = selecoes
@@ -51,7 +65,7 @@ def montar_pc():
             return redirect(url_for('montar_pc'))
         else:
             return redirect(url_for('finalizar'))
-    selecao = selecoes.get(categoria, 0)
+    selecao = selecoes.get(categoria, None)
     total = sum(pecas[cat][idx]['preco'] for cat, idx in selecoes.items())
     return render_template('montar_pc.html', etapas=etapas, etapa_atual=etapa_atual, categoria=categoria, pecas=pecas, selecao=selecao, selecoes=selecoes, total=total)
 
